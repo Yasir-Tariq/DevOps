@@ -1,0 +1,27 @@
+Description: Creating IAM role for Lambda to allow access to RDS,API Gateway and S3.
+Resources:
+  IAMRole: 
+      Type: AWS::IAM::Role
+      Properties:
+        ManagedPolicyArns:
+          -  arn:aws:iam::aws:policy/AWSLambdaFullAccess
+          -  arn:aws:iam::aws:policy/AmazonRDSFullAccess
+          -  arn:aws:iam::aws:policy/AmazonS3FullAccess
+          - arn:aws:iam::aws:policy/AmazonAPIGatewayAdministrator
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Action:
+              - "sts:AssumeRole"
+              Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+        RoleName: ForLambda
+
+Outputs:
+  RoleOutput:
+    Description: The IAM Role for lambda permissions
+    Value: !GetAtt IAMRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-RoleOutput

@@ -1,0 +1,315 @@
+Description: Creating VPC along with subnets and instances.Supported for Ubuntu AMI and for N.Virginia and Ohio region. An EC2 instance is also povisioned
+Mappings:
+  RegionMap:
+    us-east-1:
+      AZ1: us-east-1a
+      AZ2: us-east-1b
+      AZ3: us-east-1c
+      AZ4: us-east-1d
+      AZ5: us-east-1e
+      AZ6: us-east-1f
+      Ubuntu86: ami-07d0cf3af28718ef8
+      UbuntuArm: ami-0c46f9f09e3a8c2b5
+    us-east-2:
+      AZ1: us-east-2a
+      AZ2: us-east-2b
+      AZ3: us-east-2c
+      Ubuntu86: ami-05c1fa8df71875112
+      UbuntuArm: ami-0606a0d9f566249d3 
+Parameters:
+  ExternalID:
+    Description: Please enter external ID
+    Type: String
+    Default: 12345
+  VPCName:
+    Description: Enter name for the custom VPC
+    Type: String
+    Default: stackvpc
+  KeyName:
+    Description: The key pair (.pem) which is used for the infrastructure.
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: yasirKP
+    ConstraintDescription: must be a valid and existing key pair name.
+  InstanceType:
+    Description: Describes which type of instance would be provisioned when creating the stack.
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+  InstanceProfileName1:
+    Description: Enter Instance Profile name
+    Type: String
+    Default: myinstanceprofile2
+  InstanceProfileName2:
+    Description: Enter Instance Profile name
+    Type: String
+    Default: myinstanceprofile2
+Resources:
+  MyRole1:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+  RolePolicies1:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: "MyPolicy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Action: "*"
+            Resource: "*"
+      Roles:
+        -
+          Ref: "MyRole1"
+  MyRole2:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Condition:
+              StringEquals:
+                sts:ExternalId:
+                  Ref: ExternalID
+            Principal:
+              AWS: arn:aws:iam::464622532012:root
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+  RolePolicies2:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      # PolicyName: "MyPolicy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+            - autoscaling:Describe*
+            - cloudtrail:DescribeTrails
+            - cloudtrail:GetTrailStatus
+            - cloudwatch:Describe*
+            - cloudwatch:Get*
+            - cloudwatch:List*
+            - ec2:Describe*
+            - ec2:Get*
+            - ecs:Describe*
+            - ecs:List*
+            - elasticache:Describe*
+            - elasticache:List*
+            - elasticloadbalancing:Describe*
+            - elasticmapreduce:List*
+            - iam:Get*
+            - iam:List*
+            - kinesis:Get*
+            - kinesis:List*
+            - kinesis:Describe*
+            - logs:Get*
+            - logs:Describe*
+            - logs:TestMetricFilter
+            - rds:Describe*
+            - rds:List*
+            - route53:List*
+            - ses:Get*
+            - ses:List*
+            - sns:List*
+            - sns:Publish
+            - sqs:GetQueueAttributes
+            - sqs:ListQueues
+            - sqs:ReceiveMessage
+            Effect: "Allow"
+            Resource: "*"
+      Path: "/"
+      Roles:
+        -
+          Ref: "MyRole2"
+  InstanceProfile1:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Ref InstanceProfileName1
+      Path: /
+      Roles:
+        -
+          Ref: "MyRole1"
+  InstanceProfile2:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Ref InstanceProfileName2
+      Path: /
+      Roles:
+        -
+          Ref: "MyRole2"
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      Tags:
+      - Key: Name
+        Value: !Ref VPCName
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
+      Tags:
+      - Key: Name
+        Value: PublicSubnet1
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: VPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
+      Tags:
+      - Key: Name
+        Value: PublicSubnet2
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: yasirInternetGateway
+  GatewaytoInternet:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: VPC
+      InternetGatewayId:
+        Ref: InternetGateway
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: VPC
+      Tags:
+      - Key: Name
+        Value: PublicRouteTable
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewaytoInternet
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+  ElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: VPC
+  PublicSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet1
+      RouteTableId:
+        Ref: PublicRouteTable
+  PublicSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet2
+      RouteTableId:
+        Ref: PublicRouteTable
+  PublicSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable http ssh and ping for public instance
+      VpcId:
+        Ref: VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '3306'
+          ToPort: '3306'
+          CidrIp: 0.0.0.0/0
+          
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+          
+        - IpProtocol: icmp
+          FromPort: '8'
+          ToPort: '-1'
+          CidrIp: 0.0.0.0/0
+          
+  PublicEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      IamInstanceProfile:
+        Ref: InstanceProfile1
+      InstanceType:
+        Ref: InstanceType
+      KeyName:
+        Ref: KeyName
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", Ubuntu86]
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -x 
+          apt-get update -y
+          apt-get upgrade -y
+          apt install awscli -y
+          aws s3 cp s3://yasirassigns3bucketneww/config.json .
+          wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+          dpkg -i -E ./amazon-cloudwatch-agent.deb
+          mv config.json /opt/aws/amazon-cloudwatch-agent/bin/
+          /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s
+          DD_API_KEY= {...} bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+          service datadog-agent start
+      NetworkInterfaces:
+      - DeviceIndex: '0'
+        AssociatePublicIpAddress: 'true'
+        DeleteOnTermination: 'true'
+        SubnetId:
+          Ref: PublicSubnet1
+        GroupSet:
+        - Ref: PublicSecurityGroup
+      Tags:
+      - Key: Name
+        Value: PublicInstance
+Outputs:
+  PublicEC2InstanceId:
+    Description: Id of the EC2 Instance
+    Value: !Ref PublicEC2Instance
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicEC2InstanceId
+  PrivateIPEC2:
+    Description: The private IP of the EC2 instance.
+    Value: !GetAtt PublicEC2Instance.PrivateIp
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateIPEC2
+
+
+
+
+
+
+
+    
+
+

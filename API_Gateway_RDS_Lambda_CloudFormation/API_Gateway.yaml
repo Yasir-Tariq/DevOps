@@ -1,0 +1,142 @@
+Description: Creating a RESTFUL API Gateway along with methods and integrations
+Parameters:
+  LambdaStackName:
+    Description: Enter name for the lambda Stack
+    Type: String
+    Default: LambdaTest
+  ApiName:
+    Description: Please enter API name
+    Type: String
+    Default: MyAPI
+Resources:
+  APIGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Ref ApiName
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+  
+  APIMethodGet:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "GET"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn:
+              Fn::ImportValue:
+                Fn::Sub: "${LambdaStackName}-LambdaArnGET"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {"application/json": ""}        
+        RequestTemplates: 
+          application/json: "{\"EmpID\": \"$input.params('EmpID')\" }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:  { "application/json": "Empty" }      
+      RequestParameters: 
+        method.request.querystring.EmpID: true      
+      ResourceId: !Ref ApiGatewayResourceGet
+      RestApiId: !Ref APIGateway
+  
+  ApiGatewayResourceGet:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt APIGateway.RootResourceId
+      PathPart: apigatewayresourceget
+      RestApiId: !Ref APIGateway
+
+  APIMethodPost:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn:
+              Fn::ImportValue:
+                Fn::Sub: "${LambdaStackName}-LambdaArnPOST"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {"application/json": ""}        
+        # RequestTemplates: 
+        #   application/json: "{\"Student_ID\": \"$input.params('Student_ID')\" }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:  { "application/json": "Empty" }      
+      # RequestParameters: 
+      #   method.request.querystring.Student_ID: true      
+      ResourceId: !Ref ApiGatewayResourcePost
+      RestApiId: !Ref APIGateway
+  
+  ApiGatewayResourcePost:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt APIGateway.RootResourceId
+      PathPart: apigatewayresourcepost
+      RestApiId: !Ref APIGateway
+  
+  APIMethodDelete:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "DELETE"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn:
+              Fn::ImportValue:
+                Fn::Sub: "${LambdaStackName}-LambdaArnDELETE"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {"application/json": ""}        
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:  { "application/json": "Empty" }           
+      ResourceId: !Ref ApiGatewayResourceDelete
+      RestApiId: !Ref APIGateway
+  
+  ApiGatewayResourceDelete:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt APIGateway.RootResourceId
+      PathPart: apigatewayresourcedelete
+      RestApiId: !Ref APIGateway
+  
+  APIMethodUpdate:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "PATCH"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn:
+              Fn::ImportValue:
+                Fn::Sub: "${LambdaStackName}-LambdaArnUPDATE"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {"application/json": ""}        
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:  { "application/json": "Empty" }           
+      ResourceId: !Ref ApiGatewayResourceUpdate
+      RestApiId: !Ref APIGateway
+  
+  ApiGatewayResourceUpdate:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt APIGateway.RootResourceId
+      PathPart: apigatewayresourceupdate
+      RestApiId: !Ref APIGateway

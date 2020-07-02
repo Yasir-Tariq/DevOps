@@ -1,0 +1,4 @@
+---
+db_user_name: <user_name>
+db_user_pass: <password>
+db_host: '%'

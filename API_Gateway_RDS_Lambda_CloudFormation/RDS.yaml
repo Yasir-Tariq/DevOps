@@ -1,0 +1,60 @@
+Description: Creating an RDS instance
+Parameters:
+  AllocatedStorage:
+    Description: Total allocated Storage for the RDS db instance
+    Type: Number
+    Default: 20
+  DBInstanceClass:
+    Description: Choose the rds class
+    Type: String
+    Default: db.t2.micro
+    AllowedValues:
+      - db.t2.micro
+      - db.t2.small	
+  DbIdentifier:
+    Description: the name of the db instance.
+    Type: String
+    Default: mydatabase
+  Engine:
+    Description: Choose the engine for the database
+    Type: String
+    Default: MySQL
+    AllowedValues:
+      - MySQL
+  EngineVersion:
+    Type: String
+    Default: 5.7.22
+    AllowedValues:
+      - 5.7.22
+      - 5.7.23
+  MasterUserName:
+    Type: String
+    Default: mydatabase
+  MasterUserPassword:
+    Type: String
+    Default: mydatabase
+    ConstraintDescription: must be minimum of 8 characters
+Resources:
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    Properties:
+      DBName: mydatabase
+      DeleteAutomatedBackups: "true"
+      DBInstanceIdentifier: !Ref DbIdentifier
+      AllocatedStorage: !Ref AllocatedStorage
+      DBInstanceClass: !Ref DBInstanceClass
+      Engine: !Ref Engine
+      EngineVersion: !Ref EngineVersion
+      MasterUserPassword: !Ref MasterUserPassword
+      MasterUsername: !Ref MasterUserName
+      PubliclyAccessible: "true"
+      Tags:
+        - Key: Name
+          Value: mydbinstance
+Outputs:
+  DBEndpoint:
+    Description: The endpoint of the rds db instance
+    Value: !GetAtt RDSInstance.Endpoint.Address
+    Export:
+      Name: !Sub ${AWS::StackName}-DBEndpoint

@@ -1,0 +1,110 @@
+Description: Creatinf Lambda Function to fetch,insert,update and delete data from the database.
+Parameters:
+  IAMStackName:
+    Description: Enter name for the IAM stack
+    Type: String
+    Default: IAM
+Resources:
+  lambdaApiGatewayInvokeGet:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt lambdaFunctionGet.Arn
+      Principal: "apigateway.amazonaws.com"
+  
+
+  lambdaFunctionGet:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Gets value from the RDS Instance.
+      Handler: lambda_function.lambda_handler
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${IAMStackName}-RoleOutput"
+      Code:
+        S3Bucket: lambda-functions-yasir
+        S3Key: lambda_function.py.zip
+      Runtime: python3.7
+
+  lambdaApiGatewayInvokePost:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt lambdaFunctionPost.Arn
+      Principal: "apigateway.amazonaws.com"
+  
+  lambdaFunctionPost:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: inserts data into the RDS instance.
+      Handler: lambda_function.lambda_handler
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${IAMStackName}-RoleOutput"
+      Code:
+        S3Bucket: lambda-functions-yasir
+        S3Key: lambda_insertfunction.py.zip
+      Runtime: python3.7
+  
+  lambdaApiGatewayInvokeDelete:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt lambdaFunctionDelete.Arn
+      Principal: "apigateway.amazonaws.com"
+  
+  lambdaFunctionDelete:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: deletes data from the RDS instance.
+      Handler: lambda_function.lambda_handler
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${IAMStackName}-RoleOutput"
+      Code:
+        S3Bucket: lambda-functions-yasir
+        S3Key: lambda_deletefunction.py.zip
+      Runtime: python3.7
+  
+  lambdaApiGatewayInvokeUpdate:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt lambdaFunctionUpdate.Arn
+      Principal: "apigateway.amazonaws.com"
+  
+  lambdaFunctionUpdate:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Updates data from the RDS instance.
+      Handler: lambda_function.lambda_handler
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${IAMStackName}-RoleOutput"
+      Code:
+        S3Bucket: lambda-functions-yasir
+        S3Key: lambda_updatefunction.py.zip
+      Runtime: python3.7
+
+
+Outputs:
+  LambdaArnGET:
+    Description: The ARN for the lambda function GET
+    Value: !GetAtt lambdaFunctionGet.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-LambdaArnGET
+  LambdaArnPOST:
+    Description: The ARN for the lambda function POST
+    Value: !GetAtt lambdaFunctionPost.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-LambdaArnPOST
+  LambdaArnDELETE:
+    Description: The ARN for the lambda function DELETE
+    Value: !GetAtt lambdaFunctionDelete.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-LambdaArnDELETE
+  LambdaArnUPDATE:
+    Description: The ARN for the lambda function UPDATE
+    Value: !GetAtt lambdaFunctionUpdate.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-LambdaArnUPDATE

@@ -1,0 +1,157 @@
+Description: Creating CloudWatch alarm.
+Mappings:
+  RegionMap:
+    us-east-1:
+      AZ1: us-east-1a
+      AZ2: us-east-1b
+      AZ3: us-east-1c
+      AZ4: us-east-1d
+      AZ5: us-east-1e
+      AZ6: us-east-1f
+      Ubuntu86: ami-07d0cf3af28718ef8
+      UbuntuArm: ami-0c46f9f09e3a8c2b5
+    us-east-2:
+      AZ1: us-east-2a
+      AZ2: us-east-2b
+      AZ3: us-east-2c
+      Ubuntu86: ami-05c1fa8df71875112
+      UbuntuArm: ami-0606a0d9f566249d3 
+Parameters:
+  email:
+    Description: Enter a valid email address for the SNS Topic
+    Type: String
+    Default: yasirtariq788@gmail.com
+  MySNSTopic:
+    Description: Enter name for SNS Topic
+    Type: String
+    Default: MySNSTopic
+  VPCStackName:
+    Description: Enter name for the custom VPC
+    Type: String
+    Default: stackvpc
+  InstanceType:
+    Description: Describes which type of instance would be provisioned when creating the stack.
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+  Device:
+      Description: Please enter device volume name for dimensions.
+      Type: String
+      Default: xvda1
+  fstype:
+      Description: Please enter file system type for dimensions.
+      Type: String
+      Default: ext4
+  Path:
+      Description: Please provide path for dimensions.
+      Type: String
+      Default: /
+Resources:
+  #Creating a SNS Topic
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Ref MySNSTopic
+      TopicName: !Ref MySNSTopic
+  #Creating a subscription with endpoint as email
+  MySubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref email
+      Protocol: email
+      TopicArn: !Ref SNSTopic
+
+  #Creating CPUUtilization Alarm for threshold greater than 60%
+  CPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: CPU Alarm for the EC2 instance
+      AlarmActions:
+      - Ref: SNSTopic
+      OKActions:
+      - !Ref SNSTopic
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: '300'
+      EvaluationPeriods: '1'
+      Threshold: '60'
+      ComparisonOperator: GreaterThanThreshold
+      Unit: Percent
+      Dimensions:
+      - Name: InstanceId
+        Value:
+          Fn::ImportValue:
+            Fn::Sub: "${VPCStackName}-PublicEC2InstanceId" 
+  #creating a Memory utilization alarm for threshold greater than 60%
+  MemoryAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Memory Alarm for the EC2 instance
+      AlarmActions:
+      - Ref: SNSTopic
+      MetricName: mem_used_percent
+      Namespace: mynamespace
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 60
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+      - Name: ImageId
+        Value: !FindInMap [RegionMap, !Ref "AWS::Region", Ubuntu86]
+        # Value: ami-05c1fa8df71875112
+      - Name: InstanceId
+        Value:
+          Fn::ImportValue:
+            Fn::Sub: "${VPCStackName}-PublicEC2InstanceId" 
+      - Name: InstanceType
+        Value: !Ref InstanceType
+        # Value: t2.micro
+  #Creating a disk alarm for threshold greater than 50%
+  DiskAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Disk Alarm for the EC2 instance
+      AlarmActions:
+      - Ref: SNSTopic
+      MetricName: disk_used_percent
+      Namespace: mynamespace
+      Statistic: Average
+      Period: '300'
+      EvaluationPeriods: '1'
+      Threshold: '50'
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+      - Name: ImageId
+        Value: !FindInMap [RegionMap, !Ref "AWS::Region", Ubuntu86]
+        # Value: ami-05c1fa8df71875112
+      - Name: InstanceId
+        Value:
+          Fn::ImportValue:
+            Fn::Sub: "${VPCStackName}-PublicEC2InstanceId"          
+      - Name: InstanceType
+        Value: !Ref InstanceType
+        # Value: t2.micro
+      - Name: device
+        Value: !Ref Device
+      - Name: fstype
+        Value: !Ref fstype
+      - Name: path
+        Value: !Ref Path
+
+
+
+
+
+
+
+
+    
+
+

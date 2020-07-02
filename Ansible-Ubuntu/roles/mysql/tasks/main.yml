@@ -1,0 +1,32 @@
+---
+- name: install db components
+  apt: name={{item}} state=present update_cache=yes
+  with_items:
+    - mysql-server
+    - php
+    - php-mysql
+    - python-mysqldb
+
+- name: ensure mysql started
+  service: name=mysql state=started  enabled=yes
+
+- name: copy sql file
+  copy: src=dbfile/ dest=~/ mode=0755
+
+- name: change local bind address
+  replace:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '127.0.0.1'
+    replace: "0.0.0.0"
+  notify: restart mysql
+
+- name: import init.sql
+  mysql_db:
+    state: import
+    name: all
+    target: ~/init.sql
+  notify: restart mysql
+
+- name: create db user
+  mysql_user: name={{ db_user_name }} password={{ db_user_pass }} priv=test.*:ALL host='{{ db_host }}' state=present
+  notify: restart mysql

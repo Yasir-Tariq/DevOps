@@ -1,0 +1,16 @@
+version: '3'
+services:
+  python-app:
+    build: ./python
+    ports:
+      - "5091:5000"
+    volumes:
+      - .:/pythonapp
+    depends_on:
+      - redis
+  redis:
+    build: ./redis
+  nginx:
+    build: ./nginx
+    ports:
+      - "8080:80"
