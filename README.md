@@ -1,5 +1,5 @@
 # DevOps
-Contains files for different Devops tools for reference.
+Contains reference files for different DevOps tools.
 
 
 ## Tools
