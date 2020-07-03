@@ -1,5 +1,5 @@
 # Jenkins_Automated_ECR_ECS
-Updating AWS ECR repository with update image and attaching it to the ECS service's tasks.
+Updating AWS ECR repository with updated image and attaching it to the ECS service's tasks.
 
 
 ## Pre Reqs
