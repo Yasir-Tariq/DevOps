@@ -1,0 +1,32 @@
+service: my-app
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-2
+  stage: dev
+ 
+#package:                            use packaging explicitly to package custom files and directories.
+                                    # If not used, the deployment will automatically run the packaging in the background
+#  include:
+#    - include-me.js
+#    - include-me-dir/**
+#  exclude:
+#    - exclude-me.js
+#    - exclude-me-dir/**
+
+functions:
+  envfunction:
+    handler: handler.hello
+    name: ${self:provider.region}-${self:provider.stage}-envfunction
+    environment:
+      ENV_VAR: abc123
+    events:
+      - http:
+          path: hello
+          method: GET
+    deploymentSettings:
+      type: Canary10Percent10Minutes
+      alias: production
+plugins:
+  - serverless-plugin-canary-deployments
