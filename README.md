@@ -13,7 +13,7 @@ Following are the tools covered in this repository:
 - Elastic Container Service; Creating ECS resources via CloudFormation.
 - WebScraping: Scraping content and writing it to csv file using Python programming language.
 - Docker Container Management; Deploying services and setting up volumes using Kubernetes.
-- Container Orchestration; Creating and running Docker Containers using Docker-Compose.
+- Creating and running Docker Containers using Docker-Compose.
 
 
 
