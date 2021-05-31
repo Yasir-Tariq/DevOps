@@ -36,3 +36,4 @@ jobs:
           destination-github-username: 'Yasir-Tariq'
           destination-repository-name: 'for-github-pages'
           user-email: ynaseem78@gmail.com
+          target-branch: 'main'
