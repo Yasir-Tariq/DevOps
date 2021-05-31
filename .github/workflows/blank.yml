@@ -28,12 +28,13 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: send file to other repo
-        uses: cpina/github-action-push-to-another-repository@main
+        uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source-directory: 'source'
-          destination-github-username: 'Yasir-Tariq'
-          destination-repository-name: 'test-BUILD'
-          user-email: ynaseem78@gmail.com
-          target-branch: 'master'
+          source_file: 'source'
+          user_name: 'Yasir-Tariq'
+          destination_repo: 'test-BUILD'
+          destination_folder: 'target'
+          user_email: 'ynaseem78@gmail.com'
+          destination_branch: 'master'
