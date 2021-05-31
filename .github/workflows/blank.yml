@@ -32,7 +32,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: 'source/'
+          source_file: 'source/.'
           user_name: 'Yasir-Tariq'
           destination_repo: 'Yasir-Tariq/test-BUILD'
           destination_folder: 'docs'
