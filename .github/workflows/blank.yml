@@ -36,4 +36,4 @@ jobs:
           destination-github-username: 'Yasir-Tariq'
           destination-repository-name: 'test-BUILD'
           user-email: ynaseem78@gmail.com
-          target-branch: 'main'
+          target-branch: 'master'
