@@ -33,8 +33,8 @@ jobs:
       - name: send file to other repo
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-#           API_TOKEN_GITHUB: ${{ github.token }}
+#           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+          API_TOKEN_GITHUB: ${{ github.token }}
         with:
 #           source_file: 'source/.'
 #           user_name: 'Yasir-Tariq'
