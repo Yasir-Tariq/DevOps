@@ -35,9 +35,16 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
+#           source_file: 'source/.'
+#           user_name: 'Yasir-Tariq'
+#           destination_repo: 'Yasir-Tariq/test-BUILD'
+#           destination_folder: 'docs'
+#           user_email: 'ynaseem78@gmail.com'
+#           destination_branch: 'master'
+          
           source_file: 'source/.'
-          user_name: 'Yasir-Tariq'
+          user_name: ${{ secrets.GITHUB_USER_NAME }}
           destination_repo: 'Yasir-Tariq/test-BUILD'
           destination_folder: 'docs'
-          user_email: 'ynaseem78@gmail.com'
+          user_email: ${{ secrets.GITHUB_USER_EMAIL }}
           destination_branch: 'master'
