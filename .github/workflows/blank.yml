@@ -44,6 +44,7 @@ jobs:
           
           source_file: 'source/.'
 #           user_name: ${{ secrets.USER_NAME_GITHUB }}
+          user_name: ${{ github.actor }}
           destination_repo: 'Yasir-Tariq/test-BUILD'
           destination_folder: 'docs'
 #           user_email: ${{ secrets.USER_EMAIL_GITHUB }}
