@@ -43,8 +43,8 @@ jobs:
 #           destination_branch: 'master'
           
           source_file: 'source/.'
-          user_name: ${{ secrets.GITHUB_USER_NAME }}
+          user_name: ${{ secrets.USER_NAME_GITHUB }}
           destination_repo: 'Yasir-Tariq/test-BUILD'
           destination_folder: 'docs'
-          user_email: ${{ secrets.GITHUB_USER_EMAIL }}
+          user_email: ${{ secrets.USER_EMAIL_GITHUB }}
           destination_branch: 'master'
